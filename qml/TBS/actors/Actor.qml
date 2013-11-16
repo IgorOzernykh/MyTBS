@@ -6,7 +6,6 @@ import "../players"
 Item
 {
     // При создании parent должен быть обьектом Player
-    property Player belongsTo : parent
 
     property int health
     property int armor
@@ -15,6 +14,7 @@ Item
     property real defenceMultiplier : 1.0
 
     property int movingRange//радиус движения
+    property int movingRangeLeft : movingRange
 
     property int primaryAtackRange
     property int primaryAtackDamage
@@ -37,17 +37,15 @@ Item
     property Sprite dyingSprite
 
     //Свойства для корректного отображения (надо будет реализовать спрайты)
-    property bool reverted: belongsTo.isEnemy
+    property bool reverted: parent.isEnemy
 
     SpriteSequence
     {
         id : sprite
         anchors.fill: parent
         antialiasing: true
-        sprites: [idleSprite, movingSprite, primaryAtackSprite, secondaryAtackSprite, dyingSprite]
+        sprites: [idleSprite]//, movingSprite, primaryAtackSprite, secondaryAtackSprite, dyingSprite]
     }
-
-    function turn(){}
 
     function hurt(damage)
     {
@@ -85,4 +83,5 @@ Item
         sprite.jumpTo(secondaryAtackSprite.name);
         target.hurt(secondaryAtackDamage * atackMultiplier);
     }
+
 }
