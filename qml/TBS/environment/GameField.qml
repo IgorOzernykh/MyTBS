@@ -71,8 +71,6 @@ Rectangle
     }
     function highlightPossibleCells(row, col, radius, enabled, color) // for moving
     {
-
-//        console.debug("Highlight: " + enabled);
         var currentCell = cellAt(row, col);
         currentCell.highlightColor = color || "#77AAFFAA"
         currentCell.highlighted = enabled;
@@ -152,35 +150,4 @@ Rectangle
             currentCell.highlighted = false;
         }
     }
-
-    /*function highlightPossibleCells(row, col, enabled)
-    {
-
-        var currentCell = cellAt(row, col);
-        if (currentCell == null || !currentCell.active || currentCell.isEmpty)
-            return;
-
-        var moveRangeLeft = currentCell.occupiedBy.movingRangeLeft
-        if (moveRangeLeft == 0)
-            return;
-
-        for (var i = - moveRangeLeft; i <= moveRangeLeft; i++)
-        {
-            if (i + col < 0)
-                continue;
-            if (i + col >= gameField.columns)
-                break;
-            for (var  j = Math.abs(i) - moveRangeLeft; j <= moveRangeLeft - Math.abs(i); j++)
-            {
-                if (j + row < 0)
-                    continue;
-                if (j + row >= gameField.rows)
-                    break;
-                var cell = cellAt(j + row, i + col);
-                if (cell.active && cell.isEmpty)
-                    cell.highlighted = enabled;
-            }
-        }
-        currentCell.highlighted = false;
-    }*/
 }
