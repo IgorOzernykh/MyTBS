@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "buttons"
+import "../system/Turns.js" as Turns
 
 Item
 {
@@ -16,6 +17,7 @@ Item
     {
         anchors.fill: parent
         source: "qrc:/images/buttons/res/attackBarBG.png"
+        opacity: 0.3
     }
     AttackBarButton
     {
@@ -23,10 +25,7 @@ Item
         anchors.centerIn: attackBar;
         anchors.horizontalCenterOffset: iconSize
         imageSource: "qrc:/images/buttons/res/primaryAttackButtonIcon.png"
-        MouseArea
-        {
-            onClicked: attackBar.prAttackButtonClicked();
-        }
+        onAttackBarButtonClicked: prAttackButtonClicked()
     }
     AttackBarButton
     {
@@ -34,10 +33,7 @@ Item
         anchors.centerIn: attackBar;
         anchors.verticalCenterOffset: -iconSize
         imageSource: "qrc:/images/buttons/res/secondaryAttackButtonIcon.png"
-        MouseArea
-        {
-            onClicked: attackBar.sdAttackButtonClicked();
-        }
+        onAttackBarButtonClicked: sdAttackButtonClicked()
     }
     AttackBarButton
     {
@@ -45,10 +41,7 @@ Item
         anchors.centerIn: attackBar;
         anchors.horizontalCenterOffset: -iconSize
         imageSource: "qrc:/images/buttons/res/moveButtonIcon.png"
-        MouseArea
-        {
-            onClicked: attackBar.moveButtonClicked();
-        }
+        onAttackBarButtonClicked: moveButtonClicked()
     }
     AttackBarButton
     {
@@ -56,9 +49,22 @@ Item
         anchors.centerIn: attackBar;
         anchors.verticalCenterOffset: iconSize
         imageSource: "qrc:/images/buttons/res/skipButtonIcon.png"
-        MouseArea
-        {
-            onClicked: attackBar.skipButtonClicked();
-        }
+        onAttackBarButtonClicked: skipButtonClicked()
+    }
+
+    function enableAttackBar(X, Y)
+    {
+        x = X;
+        y = Y;
+        z = 2;
+        visible = true;
+        enabled = true;
+    }
+    function disableAttackBar()
+    {
+        x = -width;
+        y = -height;
+        visible = false;
+        enabled = false;
     }
 }

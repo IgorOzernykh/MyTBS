@@ -1,13 +1,16 @@
 import QtQuick 2.0
+import DataFile 1.0
+import "../system"
+import "../system/Turns.js" as PlayerTurns
 //Основной класс для всех игроков
 Item
 {
-    id : player
+    id : abstractPlayer
+    property string name
     property bool isEnemy: false
-    property var playerUnits : Array
+    property var playerUnits : []
     readonly property int maxUnitCount : 5
-    property int freeCellIdx : 0
-    property QtObject gameBelongsTo : parent
+    property int unitCount : playerUnits.length
 
     property int money : 0
     property int level : 0
@@ -17,36 +20,77 @@ Item
     property int commanderSPSpent : 0
     property int commanderSPLeft : commanderSkillPoints - commanderSPSpent
 
-    signal initRequest();
-
-
-    function makeTurn()
+    property string dataFileSource
+    signal turnFinished
+    signal gameOver
+    File
     {
-        console.debug("Player turn")
-        /*for (var i = 0; i < freeCellIdx; i++)
-        {
-            playerUnits[i].turn()
-        }
-        if (freeCellIdx == 0)
-        {
-            //Заканчиваем игру
-            gameBelongsTo.end();
-        }*/
+        id : file;
     }
 
+    function savePlayerData()
+    {
+        file.loadFileForWriting(dataFileSource);
+        file.write(name);
+        file.write(money.toString());
+        file.write(commanderSkillPoints.toString());
+        file.write(commanderSPLeft.toString());
+        for (var i = 0; i < unitCount; i++)
+        {
+            file.write(playerUnits[i].getStatAsString());
+        }
+        file.write("finish");
+        file.close();
+    }
+    function loadPlayerData(factory)
+    {
+        file.loadFileForReading(dataFileSource);
+        name = file.read();
+        money = parseInt(file.read());
+        commanderSkillPoints = parseInt(file.read());
+        commanderSPLeft = parseInt(file.read());
+        var string = file.read();
+        while (string !== "finish")
+        {
+            var idx = parseInt(string);
+            var actor = factory.createActor(idx, abstractPlayer);
+            if (actor == null)
+                console.log("Error data reading");
+            string = file.read();
+            actor.count = parseInt(string);
+            string = file.read();
+            actor.averageHealth = actor.health * actor.count - parseInt(string);
+            string = file.read();
+            actor.averageArmor = actor.armor * actor.count - parseInt(string);
+            actor.reload();
+            playerUnits[unitCount++] = actor;
+            string = file.read();
+        }
+        console.log("Loaded " + name);
+        file.close();
+    }
+
+    function createConnection()
+    {
+        for (var i = 0; i < unitCount; i++)
+        {
+            playerUnits[i].died.connect(PlayerTurns.unitDied);
+        }
+    }
 
     function buyNewUnit(unit, numberToBy)
     {
-        if ((commanderSPLeft > 0) && (money > 0) && (numberToBy > 0) && (freeCellIdx < maxUnitCount))
+        if ((commanderSPLeft > 0) && (money > 0) && (numberToBy > 0) && (unitCount < maxUnitCount))
         {
             var count = Math.min(Math.floor(money / unit.moneyCosts),
                                  (Math.floor(commanderSPLeft / unit.spCosts)),
                                  numberToBy);
             unit.count = count;
-            player.money -= count * unit.moneyCosts;
-            player.commanderSPSpent += count * unit.spCosts;
-            playerUnits[freeCellIdx] = unit;
-            freeCellIdx++;
+
+            abstractPlayer.money -= count * unit.moneyCosts;
+            abstractPlayer.commanderSPSpent += count * unit.spCosts;
+            abstractPlayer.playerUnits[unitCount] = unit;
+            unitCount++;
         }
     }
 
@@ -58,13 +102,31 @@ Item
                                  (Math.floor(commanderSPLeft / playerUnits[unitIdx].spCosts)),
                                  numberToBy);
             playerUnits[unitIdx].count = count;
-            player.money -= count * playerUnits[unitIdx].moneyCosts;
-            player.commanderSPSpent += count * playerUnits[unitIdx].spCosts;
-
+            abstractPlayer.money -= count * playerUnits[unitIdx].moneyCosts;
+            abstractPlayer.commanderSPSpent += count * playerUnits[unitIdx].spCosts;
         }
     }
+    function makeTurn()
+    {
+        if (unitCount <= 0)
+        {
+            gameOver();
+            return;
+        }
 
-    Component.onCompleted: initRequest();
+        PlayerTurns.currentPlayer = abstractPlayer;
+        PlayerTurns.playerStatWgt.update(PlayerTurns.currentPlayer);
+        PlayerTurns.currentUnitIdx = 0;
+        PlayerTurns.nextUnitTurn();
+        turnExtension();
+    }
+    function continueTurn()
+    {
+        PlayerTurns.continueTurn();
+    }
+    function turnExtension()
+    {
 
+    }
 }
 
