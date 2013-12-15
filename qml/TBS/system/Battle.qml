@@ -42,7 +42,7 @@ Item
             if (Turns.cellCoordsRequired)
             {
                 var cell = cellAt(row, col);
-                //if (cell.isEmpty && cell.highlighted)
+                if (cell.isEmpty && cell.highlighted)
                     gamefield.cellCoords(row, col);
             }
             if (Turns.targetActorRequired)
@@ -87,9 +87,12 @@ Item
     HumanPlayer
     {
         id: player
+        width : gamefield.cellSide
+        height : width
         money: 100000
         commanderSkillPoints: 100500
         isEnemy: false
+        dataFileSource: "Test.txt"
         onGameOver:
         {
             parent.winner(enemy);
@@ -106,12 +109,15 @@ Item
         }
     }
 
-    EnemyPlayer
+    HumanPlayer
     {
         id: enemy
+        width : gamefield.cellSide
+        height : width
         money: 100000
         commanderSkillPoints: 100500
         isEnemy: true
+        dataFileSource: "EnemyTest.txt"
         onGameOver:
         {
             parent.winner(player);
